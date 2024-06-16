@@ -34,6 +34,7 @@ class OnboardingContent extends StatelessWidget {
       controller: controller,
       children: DataConstants.onboardingTiles,
       onPageChanged: (index) {
+        print('Page index updated: $index'); // Print the page index
         bloc.add(PageSwipedEvent(index: index));
       },
     );
@@ -47,7 +48,7 @@ class OnboardingContent extends StatelessWidget {
           buildWhen: (_, currState) => currState is PageChangedState,
           builder: (context, state) {
             return SmoothPageIndicator(
-              count: 3, // Assuming you have 3 pages
+              count: DataConstants.onboardingTiles.length, // Make this dynamic
               controller: bloc.pageController,
               effect: WormEffect(
                 dotColor: Colors.grey,
@@ -61,8 +62,9 @@ class OnboardingContent extends StatelessWidget {
           buildWhen: (_, currState) => currState is PageChangedState,
           builder: (context, state) {
             final int pageIndex = bloc.pageIndex;
-            print(pageIndex);
             final percent = _getPercent(pageIndex);
+            print('Percent value for page index $pageIndex: $percent'); // Print the percent value
+
             return TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: percent),
               duration: Duration(seconds: 1),
@@ -93,7 +95,6 @@ class OnboardingContent extends StatelessWidget {
             );
           },
         ),
-
         SizedBox(height: 30),
       ],
     );

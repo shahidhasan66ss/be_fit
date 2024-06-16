@@ -1,16 +1,23 @@
+// onboarding_state.dart
 part of 'onboarding_bloc.dart';
 
 @immutable
-abstract class OnboardingState {}
+abstract class OnboardingState extends Equatable {
+  const OnboardingState();
+
+  @override
+  List<Object> get props => [];
+}
 
 class OnboardingInitial extends OnboardingState {}
 
 class PageChangedState extends OnboardingState {
-  int counter;
+  final int counter;
 
-  PageChangedState({
-    this.counter=0,
-  });
+  const PageChangedState({required this.counter});
+
+  @override
+  List<Object> get props => [counter];
 }
 
 class NextScreenState extends OnboardingState {}

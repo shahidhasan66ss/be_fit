@@ -1,14 +1,23 @@
+// onboarding_event.dart
 part of 'onboarding_bloc.dart';
 
 @immutable
-abstract class OnboardingEvent {}
+abstract class OnboardingEvent extends Equatable {
+  const OnboardingEvent();
 
-class PageChangedEvent extends OnboardingEvent {}
+  @override
+  List<Object> get props => [];
+}
+
+class PageChangedEvent extends OnboardingEvent {
+  const PageChangedEvent();
+}
 
 class PageSwipedEvent extends OnboardingEvent {
   final int index;
 
-  PageSwipedEvent({required this.index});
+  const PageSwipedEvent({required this.index});
 
-
+  @override
+  List<Object> get props => [index];
 }
