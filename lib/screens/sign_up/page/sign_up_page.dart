@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../sign_in/page/sign_in.dart';
+import '../../sign_in/page/sign_in_page.dart';
 import '../../tab_bar/page/tab_bar_page.dart';
 import '../bloc/signup_bloc.dart';
 import '../widget/sign_up_content.dart';

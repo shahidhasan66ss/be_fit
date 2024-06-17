@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -11,7 +10,11 @@ part 'signup_event.dart';
 part 'signup_state.dart';
 
 class SignUpBloc extends Bloc<SignupEvent, SignUpState> {
-  SignUpBloc() : super(SignupInitial());
+  SignUpBloc() : super(SignupInitial()) {
+    on<OnTextChangedEvent>(_onTextChangedEvent);
+    on<SignUpTappedEvent>(_onSignUpTappedEvent);
+    on<SignInTappedEvent>(_onSignInTappedEvent);
+  }
 
   final userNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -21,9 +24,7 @@ class SignUpBloc extends Bloc<SignupEvent, SignUpState> {
   bool isButtonEnabled = false;
 
   @override
-  Stream<SignUpState> mapEventToState(
-      SignupEvent event,
-      ) async* {
+  Stream<SignUpState> mapEventToState(SignupEvent event) async* {
     if (event is OnTextChangedEvent) {
       if (isButtonEnabled != checkIfSignUpButtonEnabled()) {
         isButtonEnabled = checkIfSignUpButtonEnabled();
@@ -33,7 +34,11 @@ class SignUpBloc extends Bloc<SignupEvent, SignUpState> {
       if (checkValidatorsOfTextField()) {
         try {
           yield LoadingState();
-          await AuthService.signUp(emailController.text, passwordController.text, userNameController.text);
+          await AuthService.signUp(
+            emailController.text,
+            passwordController.text,
+            userNameController.text,
+          );
           yield NextTabBarPageState();
           print("Go to the next page");
         } catch (e) {
@@ -47,6 +52,36 @@ class SignUpBloc extends Bloc<SignupEvent, SignUpState> {
     }
   }
 
+  void _onTextChangedEvent(OnTextChangedEvent event, Emitter<SignUpState> emit) {
+    if (isButtonEnabled != checkIfSignUpButtonEnabled()) {
+      isButtonEnabled = checkIfSignUpButtonEnabled();
+      emit(SignUpButtonEnableChangedState(isEnabled: isButtonEnabled));
+    }
+  }
+
+  void _onSignUpTappedEvent(SignUpTappedEvent event, Emitter<SignUpState> emit) async {
+    if (checkValidatorsOfTextField()) {
+      try {
+        emit(LoadingState());
+        await AuthService.signUp(
+          emailController.text,
+          passwordController.text,
+          userNameController.text,
+        );
+        emit(NextTabBarPageState());
+        print("Go to the next page");
+      } catch (e) {
+        emit(ErrorState(message: e.toString()));
+      }
+    } else {
+      emit(ShowErrorState());
+    }
+  }
+
+  void _onSignInTappedEvent(SignInTappedEvent event, Emitter<SignUpState> emit) {
+    emit(NextSignInPageState());
+  }
+
   bool checkIfSignUpButtonEnabled() {
     return userNameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
@@ -58,6 +93,7 @@ class SignUpBloc extends Bloc<SignupEvent, SignUpState> {
     return ValidationService.username(userNameController.text) &&
         ValidationService.email(emailController.text) &&
         ValidationService.password(passwordController.text) &&
-        ValidationService.confirmPassword(passwordController.text, confirmPasswordController.text);
+        ValidationService.confirmPassword(
+            passwordController.text, confirmPasswordController.text);
   }
 }
