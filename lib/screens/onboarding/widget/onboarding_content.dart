@@ -63,7 +63,6 @@ class OnboardingContent extends StatelessWidget {
           builder: (context, state) {
             final int pageIndex = bloc.pageIndex;
             final percent = _getPercent(pageIndex);
-            print('Percent value for page index $pageIndex: $percent'); // Print the percent value
 
             return TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: percent),

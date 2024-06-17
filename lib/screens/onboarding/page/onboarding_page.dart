@@ -1,4 +1,4 @@
-import 'package:be_fit/screens/sign_up/page/sign_up.dart';
+import 'package:be_fit/screens/sign_up/page/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +23,7 @@ class OnboardingPage extends StatelessWidget {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (_) {
-                return SignUp();
+                return SignUpPage();
               },
             ),
           );

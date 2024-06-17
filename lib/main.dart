@@ -1,4 +1,5 @@
 import 'package:be_fit/screens/onboarding/page/onboarding_page.dart';
+import 'package:be_fit/screens/tab_bar/page/tab_bar_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-
   @override
   initState() {
     super.initState();
@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Colors.white,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: OnboardingPage(),
+      home: isLoggedIn ? TabBarPage() : OnboardingPage(),
     );
   }
 
