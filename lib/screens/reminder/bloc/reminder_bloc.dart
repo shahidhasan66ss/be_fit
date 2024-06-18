@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meta/meta.dart';
@@ -9,74 +8,88 @@ part 'reminder_event.dart';
 part 'reminder_state.dart';
 
 class ReminderBloc extends Bloc<ReminderEvent, ReminderState> {
-  ReminderBloc() : super(ReminderInitial());
+  ReminderBloc() : super(ReminderInitial()) {
+    on<RepeatDaySelectedEvent>(_onRepeatDaySelectedEvent);
+    on<ReminderNotificationTimeEvent>(_onReminderNotificationTimeEvent);
+    on<OnSaveTappedEvent>(_onSaveTappedEvent);
+  }
 
   int? selectedRepeatDayIndex;
   late DateTime reminderTime;
   int? dayTime;
 
-  @override
-  Stream<ReminderState> mapEventToState(
-      ReminderEvent event,
-      ) async* {
-    if (event is RepeatDaySelectedEvent) {
-      selectedRepeatDayIndex = event.index;
-      dayTime = event.dayTime;
-      yield RepeatDaySelectedState(index: selectedRepeatDayIndex);
-    } else if (event is ReminderNotificationTimeEvent) {
-      reminderTime = event.dateTime;
-      yield ReminderNotificationState();
-    } else if (event is OnSaveTappedEvent) {
-      _scheuleAtParticularTimeAndDate(reminderTime, dayTime);
-      yield OnSaveTappedState();
-    }
+  void _onRepeatDaySelectedEvent(RepeatDaySelectedEvent event, Emitter<ReminderState> emit) {
+    selectedRepeatDayIndex = event.index;
+    dayTime = event.dayTime;
+    emit(RepeatDaySelectedState(index: selectedRepeatDayIndex));
   }
 
-  Future _scheuleAtParticularTimeAndDate(
-      DateTime dateTime, int? dayTime) async {
+  void _onReminderNotificationTimeEvent(ReminderNotificationTimeEvent event, Emitter<ReminderState> emit) {
+    reminderTime = event.dateTime;
+    emit(ReminderNotificationState());
+  }
+
+  Future<void> _onSaveTappedEvent(OnSaveTappedEvent event, Emitter<ReminderState> emit) async {
+    await _scheduleAtParticularTimeAndDate(reminderTime, dayTime);
+    emit(OnSaveTappedState());
+  }
+
+  Future<void> _scheduleAtParticularTimeAndDate(DateTime dateTime, int? dayTime) async {
     final flutterNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'your other channel id',
-        'your other channel name',
-        'your other channel description');
-    final iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: iOSPlatformChannelSpecifics);
+
+    const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'your_channel_id',
+      'your_channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+
+    const iosPlatformChannelSpecifics = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iosPlatformChannelSpecifics,
+    );
 
     await flutterNotificationsPlugin.zonedSchedule(
-      1,
-      "Fitness",
-      "Hey, it's time to start your exercises!",
+      0,
+      'Fitness',
+      'Hey, it\'s time to start your exercises!',
       _scheduleWeekly(dateTime, days: _createNotificationDayOfTheWeek(dayTime)),
       platformChannelSpecifics,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
       androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
   tz.TZDateTime _scheduleDaily(DateTime dateTime) {
     final now = tz.TZDateTime.now(tz.local);
-    var timezoneOffset = DateTime.now().timeZoneOffset;
-    final scheduleDate = tz.TZDateTime.utc(now.year, now.month, now.day)
-        .add(Duration(hours: dateTime.hour, minutes: dateTime.minute))
-        .subtract(Duration(hours: timezoneOffset.inHours));
+    final scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      dateTime.hour,
+      dateTime.minute,
+    );
 
-    return scheduleDate.isBefore(now)
-        ? scheduleDate.add(Duration(days: 1))
-        : scheduleDate;
+    return scheduledDate.isBefore(now) ? scheduledDate.add(const Duration(days: 1)) : scheduledDate;
   }
 
   tz.TZDateTime _scheduleWeekly(DateTime dateTime, {required List<int>? days}) {
-    tz.TZDateTime scheduleDate = _scheduleDaily(dateTime);
+    tz.TZDateTime scheduledDate = _scheduleDaily(dateTime);
 
-    for (final int day in days ?? []) {
-      scheduleDate = scheduleDate.add(Duration(days: day));
+    while (!days!.contains(scheduledDate.weekday)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    return scheduleDate;
+    return scheduledDate;
   }
 
   List<int> _createNotificationDayOfTheWeek(int? dayTime) {

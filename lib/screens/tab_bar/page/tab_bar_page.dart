@@ -4,7 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/const/color_constants.dart';
 import '../../../core/const/path_constants.dart';
 import '../../../core/const/text_constants.dart';
+import '../../../core/service/auth_services.dart';
 import '../../home/page/home_page.dart';
+import '../../settings/settings_screen.dart';
+import '../../sign_in/page/sign_in_page.dart';
+import '../../workouts/page/workouts_page.dart';
 import '../bloc/tab_bar_bloc.dart';
 
 class TabBarPage extends StatelessWidget {
@@ -66,28 +70,28 @@ class TabBarPage extends StatelessWidget {
   Widget _createBody(BuildContext context, int index) {
     final children = [
       HomePage(),
-      // WorkoutsPage(),
-      // SettingsScreen()
-      // Scaffold(
-      //   body: Center(
-      //     child: RawMaterialButton(
-      //       fillColor: Colors.red,
-      //       child: Text(
-      //         TextConstants.signOut,
-      //         style: TextStyle(
-      //           color: ColorConstants.white,
-      //         ),
-      //       ),
-      //       onPressed: () {
-      //         AuthService.signOut();
-      //         Navigator.pushReplacement(
-      //           context,
-      //           MaterialPageRoute(builder: (_) => SignInPage()),
-      //         );
-      //       },
-      //     ),
-      //   ),
-      // ),
+      WorkoutsPage(),
+      SettingsScreen(),
+      Scaffold(
+        body: Center(
+          child: RawMaterialButton(
+            fillColor: Colors.red,
+            child: Text(
+              TextConstants.signOut,
+              style: TextStyle(
+                color: ColorConstants.white,
+              ),
+            ),
+            onPressed: () {
+              AuthService.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => SignInPage()),
+              );
+            },
+          ),
+        ),
+      ),
     ];
     return children[index];
   }

@@ -9,7 +9,7 @@ import '../../core/const/color_constants.dart';
 import '../../core/const/path_constants.dart';
 import '../../core/const/text_constants.dart';
 import '../../core/service/validation_service.dart';
-import '../../dummy.dart';
+import '../change_password/change_password.dart';
 import '../common_widgets/fitness_button.dart';
 import '../common_widgets/fitness_loading.dart';
 import '../common_widgets/settings_container.dart';
@@ -76,7 +76,7 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
               children: [_editAccountContent(context), FitnessLoading()],
             );
           if (state is EditAccountError) {
-            WidgetsBinding.instance!.addPostFrameCallback((_) async {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               _showOpenSettingsPopUp();
             });
           }

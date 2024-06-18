@@ -12,6 +12,7 @@ import '../../core/const/text_constants.dart';
 import '../../core/service/auth_services.dart';
 import '../common_widgets/settings_container.dart';
 import '../edit_account/edit_account_screen.dart';
+import '../reminder/page/reminder_page.dart';
 import '../sign_in/page/sign_in_page.dart';
 import 'bloc/settings_bloc.dart';
 
