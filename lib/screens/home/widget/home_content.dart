@@ -43,7 +43,7 @@ class HomeContent extends StatelessWidget {
         children: [
           _createProfileData(context),
           const SizedBox(height: 35),
-          HeartRateContainer(),
+          HeartRateCard(),
           const SizedBox(height: 35),
           HomeStatistics(),
           const SizedBox(height: 30),
