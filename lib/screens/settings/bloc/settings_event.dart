@@ -1,6 +1,5 @@
 part of 'settings_bloc.dart';
 
-@immutable
 abstract class SettingsEvent extends Equatable {
   const SettingsEvent();
 
@@ -18,3 +17,14 @@ class ToggleSetting extends SettingsEvent {
 }
 
 class LoadSettings extends SettingsEvent {}
+
+class LoadProfileImage extends SettingsEvent {}
+
+class UpdateProfileImage extends SettingsEvent {
+  final String imagePath;
+
+  const UpdateProfileImage({required this.imagePath});
+
+  @override
+  List<Object> get props => [imagePath];
+}

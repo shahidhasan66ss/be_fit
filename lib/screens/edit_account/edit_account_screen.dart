@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/const/color_constants.dart';
 import '../../core/const/path_constants.dart';
@@ -40,25 +41,44 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
     photoUrl = user?.photoURL ?? null;
     _nameController.text = userName;
     _emailController.text = userEmail;
+
+    // Load profile picture from local storage if available
+    _loadProfilePicture();
+
     super.initState();
+  }
+
+  Future<void> _loadProfilePicture() async {
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final File localImage = File('${appDir.path}/profile_picture.png');
+
+    if (await localImage.exists()) {
+      setState(() {
+        photoUrl = localImage.path;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _buildContext(context),
-        appBar: AppBar(
-            title: Text(TextConstants.editAccount,
-                style: TextStyle(color: Colors.black, fontSize: 18)),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            iconTheme: IconThemeData(
-              color: ColorConstants.primaryColor,
-            )));
+      body: _buildContext(context),
+      appBar: AppBar(
+        title: Text(
+          TextConstants.editAccount,
+          style: TextStyle(color: Colors.black, fontSize: 18),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        iconTheme: IconThemeData(
+          color: ColorConstants.primaryColor,
+        ),
+      ),
+    );
   }
 
   BlocProvider<EditAccountBloc> _buildContext(BuildContext context) {
@@ -80,7 +100,9 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
               _showOpenSettingsPopUp();
             });
           }
-          if (state is EditPhotoSuccess) photoUrl = state.image.path;
+          if (state is EditPhotoSuccess) {
+            photoUrl = state.image.path;
+          }
           return _editAccountContent(context);
         },
         listenWhen: (_, currState) => true,
@@ -98,8 +120,7 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
           padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
           child: SizedBox(
             height: height - 140 - MediaQuery.of(context).padding.bottom,
-            child:
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Center(child: _getImageWidget()),
               SizedBox(height: 15),
               Center(
@@ -123,42 +144,57 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               SettingsContainer(
-                  child: SettingsTextField(
-                    controller: _nameController,
-                    placeHolder: TextConstants.fullNamePlaceholder,
-                  )),
+                child: SettingsTextField(
+                  controller: _nameController,
+                  placeHolder: TextConstants.fullNamePlaceholder,
+                ),
+              ),
               if (isNameInvalid)
-                Text(TextConstants.nameShouldContain2Char,
-                    style: TextStyle(color: ColorConstants.errorColor)),
-              Text(TextConstants.email,
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  TextConstants.nameShouldContain2Char,
+                  style: TextStyle(color: ColorConstants.errorColor),
+                ),
+              Text(
+                TextConstants.email,
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               SettingsContainer(
-                  child: SettingsTextField(
-                    controller: _emailController,
-                    placeHolder: TextConstants.emailPlaceholder,
-                  )),
+                child: SettingsTextField(
+                  controller: _emailController,
+                  placeHolder: TextConstants.emailPlaceholder,
+                ),
+              ),
               if (isEmailInvalid)
-                Text(TextConstants.emailErrorText,
-                    style: TextStyle(color: ColorConstants.errorColor)),
+                Text(
+                  TextConstants.emailErrorText,
+                  style: TextStyle(color: ColorConstants.errorColor),
+                ),
               SizedBox(height: 15),
               InkWell(
                 onTap: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ChangePasswordScreen()));
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangePasswordScreen(),
+                    ),
+                  );
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(TextConstants.changePassword,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: ColorConstants.primaryColor,
-                            fontSize: 18)),
+                    Text(
+                      TextConstants.changePassword,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: ColorConstants.primaryColor,
+                        fontSize: 18,
+                      ),
+                    ),
                     SizedBox(width: 10),
-                    Icon(Icons.arrow_forward_ios,
-                        color: ColorConstants.primaryColor)
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: ColorConstants.primaryColor,
+                    ),
                   ],
                 ),
               ),
@@ -170,15 +206,14 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
                   FocusScope.of(context).unfocus();
                   setState(() {
                     isNameInvalid = !(_nameController.text.length > 1);
-                    isEmailInvalid =
-                    !ValidationService.email(_emailController.text);
+                    isEmailInvalid = !ValidationService.email(_emailController.text);
                   });
                   if (!(isNameInvalid || isEmailInvalid)) {
-                    if (userName != _nameController.text ||
-                        userEmail != _emailController.text) {
+                    if (userName != _nameController.text || userEmail != _emailController.text) {
                       _bloc.add(ChangeUserData(
-                          displayName: _nameController.text,
-                          email: _emailController.text));
+                        displayName: _nameController.text,
+                        email: _emailController.text,
+                      ));
                       userName = _nameController.text;
                       userEmail = _emailController.text;
                     }
@@ -197,21 +232,29 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
     if (photoUrl != null) {
       if (photoUrl!.startsWith('https://')) {
         return CircleAvatar(
-            child: ClipOval(
-                child: FadeInImage.assetNetwork(
-                    placeholder: PathConstants.profile,
-                    image: photoUrl!,
-                    fit: BoxFit.cover,
-                    width: 200,
-                    height: 120)),
-            radius: 60);
+          child: ClipOval(
+            child: FadeInImage.assetNetwork(
+              placeholder: PathConstants.profile,
+              image: photoUrl!,
+              fit: BoxFit.cover,
+              width: 200,
+              height: 120,
+            ),
+          ),
+          radius: 60,
+        );
       } else {
         return CircleAvatar(
-            backgroundImage: FileImage(File(photoUrl!)), radius: 60);
+          backgroundImage: FileImage(File(photoUrl!)),
+          radius: 60,
+        );
       }
-    } else
+    } else {
       return CircleAvatar(
-          backgroundImage: AssetImage(PathConstants.profile), radius: 60);
+        backgroundImage: AssetImage(PathConstants.profile),
+        radius: 60,
+      );
+    }
   }
 
   void _showOpenSettingsPopUp() {

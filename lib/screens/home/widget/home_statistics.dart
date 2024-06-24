@@ -11,11 +11,12 @@ class HomeStatistics extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // First Row: Completed Workouts
           _createComletedWorkouts(context),
-          _createColumnStatistics(),
+          SizedBox(height: 20), // Adjust spacing between rows
         ],
       ),
     );
@@ -25,8 +26,6 @@ class HomeStatistics extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     return Container(
       padding: const EdgeInsets.all(15),
-      height: 200,
-      width: screenWidth * 0.35,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: ColorConstants.white,
@@ -84,26 +83,6 @@ class HomeStatistics extends StatelessWidget {
       ),
     );
   }
-
-  Widget _createColumnStatistics() {
-    return Column(
-      children: [
-        DataWorkouts(
-          icon: PathConstants.inProgress,
-          title: TextConstants.inProgress,
-          count: 2,
-          text: TextConstants.workouts,
-        ),
-        const SizedBox(height: 20),
-        DataWorkouts(
-          icon: PathConstants.timeSent,
-          title: TextConstants.timeSent,
-          count: 62,
-          text: TextConstants.minutes,
-        ),
-      ],
-    );
-  }
 }
 
 class DataWorkouts extends StatelessWidget {
@@ -123,9 +102,8 @@ class DataWorkouts extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      height: 90,
-      width: screenWidth * 0.5,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      width: screenWidth * 0.4, // Adjust column width as needed
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: ColorConstants.white,
@@ -170,7 +148,7 @@ class DataWorkouts extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: ColorConstants.grey,
+                  color: ColorConstants.textGrey,
                 ),
               ),
             ],

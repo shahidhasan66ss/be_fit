@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../widget/workout_card.dart';
@@ -47,8 +46,8 @@ class WorkoutContent extends StatelessWidget {
 
   Widget _createWorkoutCard(WorkoutData workoutData) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: WorkoutCard(workout: workoutData)
+        padding: const EdgeInsets.only(bottom: 20),
+        child: WorkoutCard(workout: workoutData)
     );
   }
 }

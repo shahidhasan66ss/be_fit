@@ -1,6 +1,5 @@
 part of 'settings_bloc.dart';
 
-@immutable
 abstract class SettingsState extends Equatable {
   const SettingsState();
 
@@ -17,6 +16,15 @@ class SettingsLoaded extends SettingsState {
 
   @override
   List<Object> get props => [isEnabled];
+}
+
+class ProfileImageLoaded extends SettingsState {
+  final String? imagePath;
+
+  const ProfileImageLoaded({this.imagePath});
+
+  @override
+  List<Object> get props => [];
 }
 
 class SettingsError extends SettingsState {

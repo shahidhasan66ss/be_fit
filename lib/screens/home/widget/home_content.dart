@@ -1,7 +1,10 @@
+import 'dart:io';
 
+import 'package:be_fit/dummy.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/const/color_constants.dart';
 import '../../../core/const/data_constants.dart';
@@ -10,8 +13,10 @@ import '../../../core/const/text_constants.dart';
 import '../../edit_account/edit_account_screen.dart';
 import '../../workout_details_screen/page/workout_details_page.dart';
 import '../bloc/home_bloc.dart';
+import 'heart_rate_widget.dart';
 import 'home_exercises_card.dart';
 import 'home_statistics.dart';
+import '../../sign_in/page/sign_in_page.dart';
 
 class HomeContent extends StatelessWidget {
   const HomeContent({
@@ -20,11 +25,14 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: ColorConstants.homeBackgroundColor,
-      height: double.infinity,
-      width: double.infinity,
-      child: _createHomeBody(context),
+    return BlocProvider(
+      create: (_) => HomeBloc()..add(LoadProfileImageEvent()),
+      child: Container(
+        color: ColorConstants.homeBackgroundColor,
+        height: double.infinity,
+        width: double.infinity,
+        child: _createHomeBody(context),
+      ),
     );
   }
 
@@ -34,6 +42,8 @@ class HomeContent extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 20),
         children: [
           _createProfileData(context),
+          const SizedBox(height: 35),
+          HeartRateContainer(),
           const SizedBox(height: 35),
           HomeStatistics(),
           const SizedBox(height: 30),
@@ -68,20 +78,28 @@ class HomeContent extends StatelessWidget {
             children: [
               const SizedBox(width: 20),
               WorkoutCard(
-                  color: ColorConstants.cardioColor,
-                  workout: DataConstants.workouts[0],
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => WorkoutDetailsPage(
-                        workout: DataConstants.workouts[0],
-                      )))),
+                color: ColorConstants.cardioColor,
+                workout: DataConstants.workouts[0],
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => WorkoutDetailsPage(
+                      workout: DataConstants.workouts[0],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(width: 15),
               WorkoutCard(
-                  color: ColorConstants.armsColor,
-                  workout: DataConstants.homeWorkouts[1],
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => WorkoutDetailsPage(
-                        workout: DataConstants.workouts[2],
-                      )))),
+                color: ColorConstants.armsColor,
+                workout: DataConstants.homeWorkouts[1],
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => WorkoutDetailsPage(
+                      workout: DataConstants.workouts[2],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(width: 20),
             ],
           ),
@@ -93,6 +111,7 @@ class HomeContent extends StatelessWidget {
   Widget _createProfileData(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final displayName = user?.displayName ?? "No Username";
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -101,53 +120,92 @@ class HomeContent extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Hi, $displayName',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                TextConstants.checkActivity,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (_, currState) => currState is ProfileImageLoadedState,
+                    builder: (context, state) {
+                      String? imagePath;
+                      if (state is ProfileImageLoadedState) {
+                        imagePath = state.imagePath;
+                      }
+                      return GestureDetector(
+                        child: imagePath == null || imagePath.isEmpty
+                            ? CircleAvatar(
+                          backgroundImage: AssetImage(PathConstants.profile),
+                          radius: 25,
+                        )
+                            : CircleAvatar(
+                          backgroundImage: FileImage(File(imagePath)),
+                          radius: 25,
+                        ),
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => EditAccountScreen()),
+                          );
+                          BlocProvider.of<HomeBloc>(context).add(ReloadImageEvent());
+                        },
+                      );
+                    },
+                  ),
+                  SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Hi, $displayName',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                      Text(
+                        TextConstants.checkActivity,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              )
             ],
           ),
-          BlocBuilder<HomeBloc, HomeState>(
-            buildWhen: (_, currState) => currState is ReloadImageState,
-            builder: (context, state) {
-              final photoUrl =
-                  FirebaseAuth.instance.currentUser?.photoURL ?? null;
-              return GestureDetector(
-                child: photoUrl == null
-                    ? CircleAvatar(
-                    backgroundImage: AssetImage(PathConstants.profile),
-                    radius: 60)
-                    : CircleAvatar(
-                    child: ClipOval(
-                        child: FadeInImage.assetNetwork(
-                            placeholder: PathConstants.profile,
-                            image: photoUrl,
-                            fit: BoxFit.cover,
-                            width: 200,
-                            height: 120)),
-                    radius: 25),
-                onTap: () async {
-                  await Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => EditAccountScreen()));
-                  BlocProvider.of<HomeBloc>(context).add(ReloadImageEvent());
-                },
-              );
-            },
+          Container(
+            height: 35,
+            decoration: BoxDecoration(
+              color: Color(0xFF1A73E8), // Background color #1A73E8
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            child: TextButton(
+              onPressed: () {
+                _signOut(context);
+              },
+              child: Text(
+                "Sign Out",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  void _signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => SignInPage()),
+      );
+    } catch (e) {
+      // Handle sign-out errors
+      print("Error signing out: $e");
+    }
   }
 
   Widget _createProgress() {

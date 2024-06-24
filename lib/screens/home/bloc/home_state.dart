@@ -5,4 +5,8 @@ abstract class HomeState {}
 
 class HomeInitial extends HomeState {}
 
-class ReloadImageState extends HomeState {}
+class ProfileImageLoadedState extends HomeState {
+  final String? imagePath;
+
+  ProfileImageLoadedState({required this.imagePath});
+}

@@ -46,7 +46,7 @@ class TextConstants {
   static const String settingsIcon = "Settings";
 
   // Home screen
-  static const String checkActivity = "Let's check your activity";
+  static const String checkActivity = "Stronger Every Day";
   static const String finished = "Finished";
   static const String completedWorkouts = "Completed workouts";
 

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -6,6 +5,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import '../../../core/const/color_constants.dart';
 import '../../../core/const/text_constants.dart';
 import '../../../core/data/workout_data.dart';
+import '../../workout_details_screen/page/workout_details_page.dart';
 import '../bloc/workouts_bloc.dart';
 
 class WorkoutCard extends StatelessWidget {
@@ -26,59 +26,59 @@ class WorkoutCard extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        child: BlocBuilder<WorkoutsBloc, WorkoutsState>(
-          buildWhen: (_, currState) => currState is CardTappedState,
-          builder: (context, state) {
-            return InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () {
-                bloc.add(CardTappedEvent(workout: workout));
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(workout.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 3),
-                          Text(workout.exercices + " " + TextConstants.exercisesUppercase,
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ColorConstants.grey),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2),
-                          const SizedBox(height: 3),
-                          Text(workout.minutes + " " + TextConstants.minutes,
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ColorConstants.grey),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2),
-                          Spacer(),
-                          Text('${workout.currentProgress}/${workout.progress}', style: TextStyle(fontSize: 10)),
-                          SizedBox(height: 3),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 30.0, left: 2),
-                            child: LinearPercentIndicator(
-                              percent: workout.currentProgress / workout.progress,
-                              progressColor: ColorConstants.primaryColor,
-                              backgroundColor: ColorConstants.primaryColor.withOpacity(0.12),
-                              lineHeight: 6,
-                              padding: EdgeInsets.zero,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 60),
-                    Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(15), child: Image.asset(workout.image, fit: BoxFit.fill))),
-                  ],
-                ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => WorkoutDetailsPage(workout: workout),
               ),
             );
+            bloc.add(CardTappedEvent(workout: workout));
           },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(workout.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 3),
+                      Text(workout.exercices + " " + TextConstants.exercisesUppercase,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ColorConstants.grey),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2),
+                      const SizedBox(height: 3),
+                      Text(workout.minutes + " " + TextConstants.minutes,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ColorConstants.grey),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2),
+                      Spacer(),
+                      Text('${workout.currentProgress}/${workout.progress}', style: TextStyle(fontSize: 10)),
+                      SizedBox(height: 3),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 30.0, left: 2),
+                        child: LinearPercentIndicator(
+                          percent: workout.currentProgress / workout.progress,
+                          progressColor: ColorConstants.primaryColor,
+                          backgroundColor: ColorConstants.primaryColor.withOpacity(0.12),
+                          lineHeight: 6,
+                          padding: EdgeInsets.zero,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(width: 60),
+                Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(15), child: Image.asset(workout.image, fit: BoxFit.fill))),
+              ],
+            ),
+          ),
         ),
       ),
     );

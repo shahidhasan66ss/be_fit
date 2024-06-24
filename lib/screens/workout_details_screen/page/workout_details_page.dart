@@ -1,8 +1,6 @@
 import 'package:be_fit/core/extensions/list_extension.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 import '../../../core/const/text_constants.dart';
 import '../../../core/data/exercise_data.dart';
